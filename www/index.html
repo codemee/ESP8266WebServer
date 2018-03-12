@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<head>
+  <meta charset='UTF-8'>
+  <script>
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+      if (this.readyState == 4) {
+        if (this.status == 200) {
+          document.getElementById('status').innerHTML = this.responseText;
+        }
+        else {
+          document.getElementById('status').innerHTML = '無法取得狀態';
+      }
+      } 
+    };
+
+    function powerSwitch() {
+      xhttp.open('GET', '/switch', true);
+      xhttp.send();
+    }
+  </script>
+</head>
+<title>遠端遙控</title>
+<body>
+  <input type="button" onclick="powerSwitch()" value="切換開關" />
+  <p id="status">LED 狀態</p>
+</body>
+</html>
