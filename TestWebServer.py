@@ -6,10 +6,8 @@ TITLE = "空調"
 GPIO_NUM = 2
 
 # 測試用的無線網路
-STA_SSID = "FLAG-SCHOOL"
-STA_PSK = "12345678"
-STA_SSID = "MEE_MI"
-STA_PSK = "PinkFloyd1969"
+STA_SSID = ""
+STA_PSK = ""
 
 # "/" 路徑要傳回的網頁內容
 rootPage = """\
