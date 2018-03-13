@@ -39,7 +39,7 @@ if not sta_if.isconnected():
     pass
 
 # Show IP address
-print("SServer started @ ", sta_if.ifconfig()[0])
+print("Server started @ ", sta_if.ifconfig()[0])
 
 # Get pin object for controlling builtin LED
 pin = machine.Pin(GPIO_NUM, machine.Pin.OUT)
