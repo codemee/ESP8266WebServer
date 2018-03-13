@@ -6,6 +6,7 @@ import machine
 import socket
 import uselect
 import os
+import time
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -28,7 +29,9 @@ def begin(port):
 # 檢查是否有新的連線, 並加以處理新的請求
 def handleClient():
   global server
-  res = poller.poll(0)
+  # 迷之聲, 這裡使用 0ms 當 timout 會有莫名其妙當掉的問題
+  # 會出現 Fatal exception 28(LoadProhibitedCause) 後 reset
+  res = poller.poll(1)
   if res:  # 表示 server 有新的連線進來
     (socket, sockaddr) = server.accept()
     handle(socket)
@@ -104,4 +107,3 @@ def onPath(path, handler):
 def setDocPath(path):
   global docPath
   docPath = path
-
