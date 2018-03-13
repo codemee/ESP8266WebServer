@@ -9,7 +9,7 @@
           document.getElementById('status').innerHTML = this.responseText;
         }
         else {
-          document.getElementById('status').innerHTML = '無法取得狀態';
+          document.getElementById('status').innerHTML = 'Disconnected';
       }
       } 
     };
@@ -20,9 +20,9 @@
     }
   </script>
 </head>
-<title>遠端遙控</title>
+<title>Remote LED</title>
 <body>
-  <input type="button" onclick="powerSwitch()" value="切換開關" />
-  <p id="status">LED 狀態</p>
+  <input type="button" onclick="powerSwitch()" value="Switch" />
+  <p id="status">LED Status</p>
 </body>
 </html>

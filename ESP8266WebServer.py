@@ -107,3 +107,4 @@ def onPath(path, handler):
 def setDocPath(path):
   global docPath
   docPath = path
+
