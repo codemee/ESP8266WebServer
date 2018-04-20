@@ -20,7 +20,7 @@ docPath = "/"
 
 # Function to start http server
 def begin(port):
-  global server
+  global server, poller
   server.bind(('0.0.0.0', port))
   server.listen(1)
   # Register for checking new client connection
@@ -28,7 +28,7 @@ def begin(port):
 
 # Check for new client connection and process the request
 def handleClient():
-  global server
+  global server, poller
   # Note:don't call poll() with 0, that would randomly cause
   # reset with "Fatal exception 28(LoadProhibitedCause)" message
   res = poller.poll(1)
@@ -107,4 +107,5 @@ def onPath(path, handler):
 def setDocPath(path):
   global docPath
   docPath = path
+
 
