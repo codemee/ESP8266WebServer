@@ -26,6 +26,10 @@ def begin(port):
   # Register for checking new client connection
   poller.register(server, uselect.POLLIN)
 
+def close():
+  poller.unregister(server)
+  server.close()
+
 # Check for new client connection and process the request
 def handleClient():
   global server, poller
