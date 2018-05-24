@@ -90,7 +90,9 @@ ESP8266WebServer.onPath("/switch", handleSwitch)
 # Setting the path to documents
 ESP8266WebServer.setDocPath("/www")
 
-while True:
-  # Let server process requests
-  ESP8266WebServer.handleClient()
-
+try:
+  while True:
+    # Let server process requests
+    ESP8266WebServer.handleClient()
+except:
+  ESP8266WebServer.close()
