@@ -68,13 +68,23 @@ def __sendPage(socket, filePath):
 def err(socket, code, message):
     """Respong error meesage to client
     """
-    socket.write("HTTP/1.1 " + code + " " + message + "\r\n\r\n")
+    socket.write("HTTP/1.1 " + code + " " + message + "\r\n")
+    socket.write("Content-Type: text/html\r\n\r\n")
     socket.write("<h1>" + message + "</h1>")
 
-def ok(socket, code, msg):
+def ok(socket, code, *args):
     """Response successful message or webpage to client
     """
-    socket.write("HTTP/1.1 " + code + " OK\r\n\r\n")
+    if len(args)==1:
+        content_type = "text/plain"
+        msg = args[0]
+    elif len(args)==2:
+        content_type = args[0]
+        msg = args[1]
+    else:
+        raise TypeError("ok() takes 3 or 4 positional arguments but "+ str(len(args)+2) +" were given")
+    socket.write("HTTP/1.1 " + code + " OK\r\n")
+    socket.write("Content-Type: " + content_type + "\r\n\r\n")
     if __fileExist(msg):
         filePath = msg
         __sendPage(socket, filePath)
@@ -149,7 +159,8 @@ def handle(socket):
                     return
             
         # Responds the header first
-        socket.write("HTTP/1.1 200 OK\r\n\r\n")
+        socket.write("HTTP/1.1 200 OK\r\n")
+        socket.write("Content-Type: text/html\r\n\r\n")
         # Responds the file content
         if filePath.endswith(".p.html"):
             print("template file.")
