@@ -16,6 +16,8 @@ server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 poller = uselect.poll()
 # Dict for registed handlers of all paths
 handlers = {}
+# Function of handler for request not found
+notFoundHandler = None
 # The path to the web documents on MicroPython filesystem
 docPath = "/"
 # Data for template
@@ -48,17 +50,46 @@ def handleClient():
         handle(socket)
         socket.close()
 
+def __sendPage(socket, filePath):
+    """Send the file as webpage to client
+    """
+    try:
+        f = open(filePath, "rb")
+        while True:
+            data = f.read(64)
+            if (data == b""):
+                break
+            socket.write(data)
+        f.close()
+    except Exception as e:
+        print(e)
+
+
 def err(socket, code, message):
     """Respong error meesage to client
     """
-    socket.write("HTTP/1.1 " + code + " " + message + "\r\n\r\n")
+    socket.write("HTTP/1.1 " + code + " " + message + "\r\n")
+    socket.write("Content-Type: text/html\r\n\r\n")
     socket.write("<h1>" + message + "</h1>")
 
-def ok(socket, code, msg):
-    """Response succesful message to client
+def ok(socket, code, *args):
+    """Response successful message or webpage to client
     """
-    socket.write("HTTP/1.1 " + code + " OK\r\n\r\n")
-    socket.write(msg)
+    if len(args)==1:
+        content_type = "text/plain"
+        msg = args[0]
+    elif len(args)==2:
+        content_type = args[0]
+        msg = args[1]
+    else:
+        raise TypeError("ok() takes 3 or 4 positional arguments but "+ str(len(args)+2) +" were given")
+    socket.write("HTTP/1.1 " + code + " OK\r\n")
+    socket.write("Content-Type: " + content_type + "\r\n\r\n")
+    if __fileExist(msg):
+        filePath = msg
+        __sendPage(socket, filePath)
+    else:
+        socket.write(msg)
 
 def __fileExist(path):
     """Check for file existence
@@ -109,8 +140,8 @@ def handle(socket):
         err(socket, "501", "Not Implemented")
     elif path in handlers: # Check for registered path
         handlers[path](socket, args)
-    elif not path.startswith(docPath): # Check for path to any document
-        err(socket, "400", "Bad Request")
+    #elif not path.startswith(docPath): # Check for path to any document
+    #    err(socket, "400", "Bad Request")
     else:
         filePath = path
         # find the file
@@ -121,11 +152,15 @@ def handle(socket):
                 filePath = path + ("index.p.html" if path.endswith("/") else "/index.p.html")
                 # find index.p.html in the path
                 if not __fileExist(filePath):
-                    err(socket, "404", "Not Found")
+                    if notFoundHandler:
+                        notFoundHandler(socket)
+                    else:
+                        err(socket, "404", "Not Found")
                     return
             
         # Responds the header first
-        socket.write("HTTP/1.1 200 OK\r\n\r\n")
+        socket.write("HTTP/1.1 200 OK\r\n")
+        socket.write("Content-Type: text/html\r\n\r\n")
         # Responds the file content
         if filePath.endswith(".p.html"):
             print("template file.")
@@ -134,19 +169,19 @@ def handle(socket):
                 socket.write(l.format(**tplData))
             f.close()
         else:
-            f = open(filePath, "rb")
-            while True:
-                data = f.read(64)
-                if (data == b""):
-                    break
-                socket.write(data)
-            f.close()
+            __sendPage(socket, filePath)
 
 def onPath(path, handler):
-    """Register handler for processing request fo specified path
+    """Register handler for processing request of specified path
     """
     global handlers
     handlers[path] = handler
+    
+def onNotFound(handler):
+    """Register handler for processing request of not found path
+    """
+    global notFoundHandler
+    notFoundHandler = handler
 
 def setDocPath(path):
     """Set the path to documents' directory
