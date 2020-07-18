@@ -5,8 +5,8 @@ import machine
 GPIO_NUM = 2 # Builtin led (D4)
 
 # Wi-Fi configuration
-STA_SSID = "MEE_MI"
-STA_PSK = "PinkFloyd1969"
+STA_SSID = "FlagTest"
+STA_PSK = "0233110330"
 
 # Disable AP interface
 ap_if = network.WLAN(network.AP_IF)
@@ -32,10 +32,13 @@ pin.on() # Turn LED off (it use sinking input)
 
 # Handler for path "/cmd?led=[on|off]"    
 def handleCmd(socket, args):
+    global ledData
     if 'led' in args:
         if args['led'] == 'on':
+            ledData["status"]="ON"
             pin.off()
         elif args['led'] == 'off':
+            ledData["status"]="OFF"
             pin.on()
         ESP8266WebServer.ok(socket, "200", args["led"])
     else:
@@ -46,6 +49,12 @@ ESP8266WebServer.begin(8899)
 
 # Register handler for each path
 ESP8266WebServer.onPath("/cmd", handleCmd)
+ESP8266WebServer.setDocPath("/www2")
+
+ledData = {
+    "status":"Off",
+}
+ESP8266WebServer.setTplData(ledData)
 
 try:
     while True:
