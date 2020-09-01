@@ -5,8 +5,8 @@ import machine
 GPIO_NUM = 2 # Builtin led (D4)
 
 # Wi-Fi configuration
-STA_SSID = "FlagTest"
-STA_PSK = "0233110330"
+STA_SSID = "MEE_MI"
+STA_PSK = "PinkFloyd1969"
 
 # Disable AP interface
 ap_if = network.WLAN(network.AP_IF)

@@ -85,11 +85,11 @@ def ok(socket, code, *args):
         raise TypeError("ok() takes 3 or 4 positional arguments but "+ str(len(args)+2) +" were given")
     socket.write("HTTP/1.1 " + code + " OK\r\n")
     socket.write("Content-Type: " + content_type + "\r\n\r\n")
-    if __fileExist(msg):
-        filePath = msg
-        __sendPage(socket, filePath)
-    else:
-        socket.write(msg)
+#     if __fileExist(msg):
+#         filePath = msg
+#         __sendPage(socket, filePath)
+#     else:
+    socket.write(msg)
 
 def __fileExist(path):
     """Check for file existence
@@ -157,10 +157,17 @@ def handle(socket):
                     else:
                         err(socket, "404", "Not Found")
                     return
+            socket.write("HTTP/1.1 302 Found\r\n")
+            socket.write("Location: " + filePath + "\r\n\r\n")
+            return
             
         # Responds the header first
         socket.write("HTTP/1.1 200 OK\r\n")
         socket.write("Content-Type: text/html\r\n\r\n")
+#         if filePath.endswith(".css"):
+#             socket.write("Content-Type: text/css\r\n\r\n")
+#         else:
+#             socket.write("Content-Type: text/html\r\n\r\n")
         # Responds the file content
         if filePath.endswith(".p.html"):
             print("template file.")
