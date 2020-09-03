@@ -143,22 +143,22 @@ def handle(socket):
     # Check for supported HTTP version
     if version != "HTTP/1.0\r\n" and version != "HTTP/1.1\r\n":
         err(socket, "505", "Version Not Supported")
-    elif method != "GET": # Only accept GET request
+    elif method != "GET":  # Only accept GET request
         err(socket, "501", "Not Implemented")
     elif path in handlers: # Check for registered path
         handlers[path](socket, args)
-    #elif not path.startswith(docPath): # Check for path to any document
-    #    err(socket, "400", "Bad Request")
-    else:
+    elif not path.startswith(docPath): # Check for wrong path
+        err(socket, "400", "Bad Request")
+    else: # find file in the document path
         filePath = path
-        # find the file
-        if not __fileExist(filePath):
+        # find the file 
+        if not __fileExist(filePath): 
             filePath = path + ("index.html" if path.endswith("/") else "/index.html")
             # find index.html in the path
             if not __fileExist(filePath):
                 filePath = path + ("index.p.html" if path.endswith("/") else "/index.p.html")
                 # find index.p.html in the path
-                if not __fileExist(filePath):
+                if not __fileExist(filePath): # no default html file found
                     if notFoundHandler:
                         notFoundHandler(socket)
                     else:
