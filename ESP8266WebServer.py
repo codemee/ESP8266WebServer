@@ -151,23 +151,25 @@ def handle(socket):
         err(socket, "400", "Bad Request")
     else: # find file in the document path
         filePath = path
+        fileFound = True
         # find the file 
-        if not __fileExist(filePath): 
-            filePath = path + ("index.html" if path.endswith("/") else "/index.html")
-            # find index.html in the path
-            if not __fileExist(filePath):
-                filePath = path + ("index.p.html" if path.endswith("/") else "/index.p.html")
-                # find index.p.html in the path
-                if not __fileExist(filePath): # no default html file found
-                    if notFoundHandler:
-                        notFoundHandler(socket)
-                    else:
-                        err(socket, "404", "Not Found")
-                    return
-            socket.write("HTTP/1.1 302 Found\r\n")
-            socket.write("Location: " + filePath + "\r\n\r\n")
+        if not __fileExist(filePath):
+            if not path.endswith("/"):
+                fileFound = False
+            else:
+                filePath = path + "index.html"
+                # find index.html in the path
+                if not __fileExist(filePath):
+                    filePath = path + "index.p.html"
+                    # find index.p.html in the path
+                    if not __fileExist(filePath): # no default html file found
+                        fileFound = False
+        if not fileFound: # file or default html file specified in path not found
+            if notFoundHandler:
+                notFoundHandler(socket)
+            else:
+                err(socket, "404", "Not Found")
             return
-            
         # Responds the header first
         socket.write("HTTP/1.1 200 OK\r\n")
         contentType = "text/html"
