@@ -54,8 +54,8 @@ Check for new request and call corresponding handler to process it.
 
 You can upload www directory and index.p.html to "/" on ESP8266 board and run TestWebServer.py to see how it works.
 
-TestWebServer.py will show its own IP address through serial monitor.Just open your browser and connect it to http://serverIP:8899 or http://serverIP:8899/index.p.html, you'll get the main page that can turn on/off the buildin led on ESP8266 board. The main also demonstrate the template file usage. 
+TestWebServer.py will show its own IP address through serial monitor.Just open your browser and connect it to http://serverIP:8899 or http://serverIP:8899/index.p.html, you'll get the main page that can turn on/off the buildin led on ESP8266 board. The main page also demonstrate the template file usage. 
 
-You can also open http://serverip:8899/www/index.html or http://serverip:8899/www to view alternative version of controlling page that use AJAX to asynchronously turn on/off led.
+You can also open http://serverip:8899/www/index.html or http://serverip:8899/www/ to view alternative version of controlling page that use AJAX to asynchronously turn on/off led.
 
 You can use http://serverip:8899/switch to switch led on/off led directly. Or you can use http://serverip:8899/cmd?led=on to turn the led on and http://serverip:8899/cmd?led=off to turn the led off.
