@@ -23,6 +23,13 @@ docPath = "/"
 # Data for template
 tplData = {}
 
+# MIME types
+mimeTypes = {
+    ".css":"text/css",
+    ".jpg":"image/jpg",
+    ".png":"image/png",
+}
+
 def begin(port):
     """Function to start http server
     """
@@ -163,11 +170,11 @@ def handle(socket):
             
         # Responds the header first
         socket.write("HTTP/1.1 200 OK\r\n")
-        socket.write("Content-Type: text/html\r\n\r\n")
-#         if filePath.endswith(".css"):
-#             socket.write("Content-Type: text/css\r\n\r\n")
-#         else:
-#             socket.write("Content-Type: text/html\r\n\r\n")
+        contentType = "text/html"
+        for ext in mimeTypes:
+            if filePath.endswith(ext):
+                contentType = mimeTypes[ext]
+        socket.write("Content-Type: " + contentType + "\r\n\r\n")
         # Responds the file content
         if filePath.endswith(".p.html"):
             print("template file.")
