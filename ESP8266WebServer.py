@@ -54,6 +54,7 @@ def handleClient():
     res = poller.poll(1)
     if res:  # There's a new client connection
         (socket, sockaddr) = server.accept()
+        socket.settimeout(0.02) # set timeout to avoid blocking
         handle(socket)
         socket.close()
 
@@ -118,7 +119,10 @@ def handle(socket):
     """Processing new GET request
     """
     global docPath, handlers
-    currLine = str(socket.readline(), 'utf-8')
+    try: # capture timeout for wainting a line
+        currLine = str(socket.readline(), 'utf-8')
+    except:
+        currLine = "" # readline timeout (not a complete line) 
     request = currLine.split(" ")
     if len(request) != 3: # Discarded if it's a bad header
         return
