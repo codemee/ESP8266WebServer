@@ -66,7 +66,8 @@ def handleSwitch(socket, args):
     updateInfo(socket)
     
 # Start the server @ port 8899
-ESP8266WebServer.begin(8899)
+# ESP8266WebServer.begin(8899)
+ESP8266WebServer.begin() # use default 80 port
 
 # Register handler for each path
 # ESP8266WebServer.onPath("/", handleRoot)

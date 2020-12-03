@@ -30,7 +30,7 @@ mimeTypes = {
     ".png":"image/png",
 }
 
-def begin(port):
+def begin(port=80):
     """Function to start http server
     """
     global server, poller
@@ -54,7 +54,7 @@ def handleClient():
     res = poller.poll(1)
     if res:  # There's a new client connection
         (socket, sockaddr) = server.accept()
-        socket.settimeout(0.02) # set timeout to avoid blocking
+        socket.settimeout(0.02) # set timeout for readline to avoid blocking
         handle(socket)
         socket.close()
 
