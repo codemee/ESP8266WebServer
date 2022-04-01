@@ -184,7 +184,7 @@ def handle(socket):
             args[arg[0]] = arg[1]
             
     while True: # Read until blank line after header
-        header = socket.readline()# TODO read content & content type header
+        header = socket.readline()
         if header.startswith(b"Content-Length"):
             (key, contentLengthStr) = str(header).split(" ")
             contentLength = int(contentLengthStr[0:-5])
@@ -209,7 +209,7 @@ def handle(socket):
     # Check for supported HTTP version
     if version != "HTTP/1.0\r\n" and version != "HTTP/1.1\r\n":
         err(socket, "505", "Version Not Supported")
-    elif (method != "GET" and method != "PUT" and method != "POST"):  # Only accept GET request
+    elif (method != "GET" and method != "PUT" and method != "POST"):  # Only accept GET,PUT and POST request
         err(socket, "501", "Not Implemented")
     elif path in handlers: # Check for registered path
         handlers[path](socket, args, method, contentType, content)
