@@ -1,3 +1,6 @@
+This Library is no longer supported. Visit https://github.com/codemee/ESPWebServer for a version that supports ESP8266 and ESP32.
+
+----
 # ESP8266WebServer
 
 This is a very lightweight web server for MicroPython on ESP8266. It only accept GET, POST and PUT requests. It adopts the programming style of  ESP8266WebServer library in ESP8266 Arduino Core.This make it suitable for serving REST API.The original code was inspired from the project [Controlling a GPIO through an ESP8266-based web server](https://lab.whitequark.org/notes/2016-10-20/controlling-a-gpio-through-an-esp8266-based-web-server/).
