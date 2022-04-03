@@ -22,6 +22,8 @@ notFoundHandler = None
 docPath = "/"
 # Data for template
 tplData = {}
+# Max. POST/PUT-Data size
+maxContentLength = 1024
 
 # MIME types
 mimeTypes = {
@@ -115,6 +117,45 @@ def __fileExist(path):
         print("Not Found.")
         return False
 
+def __serveFile(socket, path):
+    """Serves a file from the filesystem
+    """
+    filePath = path
+    fileFound = True
+    # find the file 
+    if not __fileExist(filePath):
+        if not path.endswith("/"):
+           fileFound = False
+        else:
+            filePath = path + "index.html"
+            # find index.html in the path
+            if not __fileExist(filePath):
+                filePath = path + "index.p.html"
+                # find index.p.html in the path
+                if not __fileExist(filePath): # no default html file found
+                    fileFound = False
+    if not fileFound: # file or default html file specified in path not found
+        if notFoundHandler:
+            notFoundHandler(socket)
+        else:
+            err(socket, "404", "Not Found")
+        return
+    # Responds the header first
+    socket.write("HTTP/1.1 200 OK\r\n")
+    contentType = "text/html"
+    for ext in mimeTypes:
+        if filePath.endswith(ext):
+            contentType = mimeTypes[ext]
+    socket.write("Content-Type: " + contentType + "\r\n\r\n")
+    # Responds the file content
+    if filePath.endswith(".p.html"):
+        f = open(filePath, "r")
+        for l in f:
+            socket.write(l.format(**tplData))
+        f.close()
+    else:
+        __sendPage(socket, filePath)
+
 def handle(socket):
     """Processing new GET request
     """
@@ -132,64 +173,53 @@ def handle(socket):
     else:
         (path, query) = (url, "")
     args = {}
+    contentType = ""
+    content = b""
+    contentLength = 0
+    
     if query: # Parsing the querying string
         argPairs = query.split("&")
         for argPair in argPairs:
             arg = argPair.split("=")
             args[arg[0]] = arg[1]
+            
     while True: # Read until blank line after header
         header = socket.readline()
-        if header == b"":
+        if header.startswith(b"Content-Length"):
+            (key, contentLengthStr) = str(header).split(" ")
+            contentLength = int(contentLengthStr[0:-5])
+            if (contentLength > maxContentLength):
+                err(socket, "400", "Bad Request")
+                return
+        if (header.startswith(b"Content-Type")):
+            (key, contentType) = str(header).split(" ")
+            contentType = contentType[0:-5]
+        if (header == b""):
             return
-        if header == b"\r\n":
+        if (header == b"\r\n" and contentLength > 0):
+            while(len(content) < contentLength):
+                content = content + socket.recv(contentLength)
+                if (len(content) > maxContentLength):
+                    err(socket, "400", "Bad Request")
+                    return
             break
-
+        elif header == b"\r\n":
+            break
+    
     # Check for supported HTTP version
     if version != "HTTP/1.0\r\n" and version != "HTTP/1.1\r\n":
         err(socket, "505", "Version Not Supported")
-    elif method != "GET":  # Only accept GET request
+    elif (method != "GET" and method != "PUT" and method != "POST"):  # Only accept GET,PUT and POST request
         err(socket, "501", "Not Implemented")
     elif path in handlers: # Check for registered path
-        handlers[path](socket, args)
+        handlers[path](socket, args, method, contentType, content)
     elif not path.startswith(docPath): # Check for wrong path
         err(socket, "400", "Bad Request")
     else: # find file in the document path
         filePath = path
-        fileFound = True
-        # find the file 
-        if not __fileExist(filePath):
-            if not path.endswith("/"):
-                fileFound = False
-            else:
-                filePath = path + "index.html"
-                # find index.html in the path
-                if not __fileExist(filePath):
-                    filePath = path + "index.p.html"
-                    # find index.p.html in the path
-                    if not __fileExist(filePath): # no default html file found
-                        fileFound = False
-        if not fileFound: # file or default html file specified in path not found
-            if notFoundHandler:
-                notFoundHandler(socket)
-            else:
-                err(socket, "404", "Not Found")
-            return
-        # Responds the header first
-        socket.write("HTTP/1.1 200 OK\r\n")
-        contentType = "text/html"
-        for ext in mimeTypes:
-            if filePath.endswith(ext):
-                contentType = mimeTypes[ext]
-        socket.write("Content-Type: " + contentType + "\r\n\r\n")
-        # Responds the file content
-        if filePath.endswith(".p.html"):
-            print("template file.")
-            f = open(filePath, "r")
-            for l in f:
-                socket.write(l.format(**tplData))
-            f.close()
-        else:
-            __sendPage(socket, filePath)
+        print("Serve File " + filePath)
+        __serveFile(socket, filePath)
+
 
 def onPath(path, handler):
     """Register handler for processing request of specified path
@@ -214,3 +244,9 @@ def setTplData(data):
     """
     global tplData
     tplData = data
+
+def setMaxContentLength(max):
+    """Set the maximum content lenpth for incomming data bodies
+    """
+    global maxContentLength
+    maxContentLength = max
